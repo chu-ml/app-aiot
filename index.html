@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>AIoT 溫度感測系統</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+        }
+        .card {
+            background: white;
+            padding: 20px;
+            margin: 20px auto;
+            width: 300px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .temp {
+            font-size: 48px;
+            color: #ff5733;
+        }
+        canvas {
+            max-width: 600px;
+            margin: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🌡️ AIoT 溫度感測應用</h1>
+
+    <div class="card">
+        <h2>即時溫度</h2>
+        <div class="temp" id="temperature">-- °C</div>
+        <p id="status">感測器連線中...</p>
+    </div>
+
+    <canvas id="tempChart"></canvas>
+
+    <script>
+        const tempDisplay = document.getElementById("temperature");
+        const statusText = document.getElementById("status");
+
+        const ctx = document.getElementById("tempChart").getContext("2d");
+
+        const data = {
+            labels: [],
+            datasets: [{
+                label: '溫度 (°C)',
+                data: [],
+                borderColor: 'red',
+                fill: false,
+                tension: 0.3
+            }]
+        };
+
+        const config = {
+            type: 'line',
+            data: data,
+            options: {
+                scales: {
+                    x: { title: { display: true, text: '時間' } },
+                    y: { title: { display: true, text: '溫度 °C' } }
+                }
+            }
+        };
+
+        const tempChart = new Chart(ctx, config);
+
+        // 模擬溫度資料 (可改為 fetch / MQTT)
+        function getTemperature() {
+            return (20 + Math.random() * 10).toFixed(2);
+        }
+
+        function updateTemperature() {
+            const temp = getTemperature();
+            const time = new Date().toLocaleTimeString();
+
+            tempDisplay.innerText = temp + " °C";
+            statusText.innerText = "感測器正常運作";
+
+            data.labels.push(time);
+            data.datasets[0].data.push(temp);
+
+            if (data.labels.length > 10) {
+                data.labels.shift();
+                data.datasets[0].data.shift();
+            }
+
+            tempChart.update();
+        }
+
+        // 每2秒更新一次
+        setInterval(updateTemperature, 2000);
+    </script>
+
+</body>
+</html>
